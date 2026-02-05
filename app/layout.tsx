@@ -9,16 +9,19 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Expense Tracker PWA',
-  description: 'Track expenses, manage budgets, and split bills with friends',
+  title: 'Paris Gastos',
+  description: 'Track travel expenses in Paris, manage budgets, and split bills',
   generator: 'v0.app',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
-    title: 'Expense Tracker',
+    statusBarStyle: 'black-translucent',
+    title: 'Paris Gastos',
   },
-
+  applicationName: 'Paris Gastos',
+  formatDetection: {
+    telephone: false,
+  },
 }
 
 export const viewport: Viewport = {

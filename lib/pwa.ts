@@ -2,17 +2,15 @@
 
 // Service Worker registration
 export async function registerServiceWorker() {
-  // DISABLED: Service worker causing crashes (ERR_FAILED)
-  console.log('[PWA] Service worker registration is disabled to prevent crashes')
-  return null
-  
   // Skip in development/preview environments where SW may not be available
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+    console.log('[PWA] Service worker not supported')
     return null
   }
 
   // Check if we're in a preview environment
-  const isPreview = window.location.hostname.includes('vusercontent.net')
+  const isPreview = window.location.hostname.includes('vusercontent.net') || 
+                    window.location.hostname.includes('localhost')
   if (isPreview) {
     console.log('[PWA] Skipping service worker registration in preview environment')
     return null
