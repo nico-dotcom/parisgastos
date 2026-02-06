@@ -204,6 +204,10 @@ export default function ExpenseForm({ expense, mode = 'create' }: ExpenseFormPro
         // If shopping expense (is_excluded), force category_id = 44 (Ropa)
         const categoryId = formData.is_excluded ? '44' : formData.category_id
         
+        // Parse YYYY-MM-DD as local date (timezone del celular) para evitar desfase UTC
+        const [y, mo, da] = formData.date.split('-').map(Number)
+        const localDate = new Date(y, mo - 1, da, 12, 0, 0) // mediodía local evita cambio de día
+        
         // RPC: 7 params obligatorios. p_trip_id = 92713244 siempre.
         const rpcParams = {
           p_app_user_id: user.id,
@@ -212,7 +216,7 @@ export default function ExpenseForm({ expense, mode = 'create' }: ExpenseFormPro
           p_amount: amount,
           p_currency_code: defaultCurrency,
           p_category_id: categoryId ? parseInt(categoryId) : null,
-          p_expense_date: new Date(formData.date).toISOString(),
+          p_expense_date: localDate.toISOString(),
         }
         const { error } = await supabase.rpc('rpc_insert_manual_expense', rpcParams)
 
@@ -227,6 +231,9 @@ export default function ExpenseForm({ expense, mode = 'create' }: ExpenseFormPro
         router.push('/expenses')
       } else if (expense) {
         const categoryId = formData.is_excluded ? '44' : formData.category_id
+        // Parse YYYY-MM-DD as local date (timezone del celular)
+        const [yu, mou, dau] = formData.date.split('-').map(Number)
+        const localDateUpdate = new Date(yu, mou - 1, dau, 12, 0, 0)
         const { error } = await supabase.rpc('rpc_update_manual_expense', {
           p_app_user_id: user.id,
           p_expense_internal_id: parseInt(expense.id, 10),
@@ -234,7 +241,7 @@ export default function ExpenseForm({ expense, mode = 'create' }: ExpenseFormPro
           p_amount: amount,
           p_currency_code: defaultCurrency,
           p_category_id: categoryId ? parseInt(categoryId) : null,
-          p_expense_date: new Date(formData.date).toISOString(),
+          p_expense_date: localDateUpdate.toISOString(),
         })
         if (error) {
           reportError(error, 'Expense update')
