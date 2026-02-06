@@ -148,6 +148,7 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
         supabase.rpc<TodayBudget>('rpc_trip_today_budget', {
           p_trip_id: tId,
           p_app_user_id: appUserId,
+          p_today: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD en zona horaria del dispositivo
         }),
         supabase.rpc<CategoryBreakdown[]>('rpc_trip_category_dashboard', {
           p_trip_id: tId,
