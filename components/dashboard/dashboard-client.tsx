@@ -744,25 +744,33 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
               </div>
 
               {/* Shopping - from overview.shopping; excluded from trip budget */}
-              <div className="rounded-2xl bg-white dark:bg-[#1e2532] p-4 shadow-[0_4px_20px_-2px_rgba(45,74,62,0.08)] border-l-[6px] border-[#c16a4d] flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#c16a4d]/10 text-[#c16a4d] shrink-0">
-                    <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#2d4a3e] dark:text-white text-sm">Compras</span>
+              <div className="rounded-2xl bg-white dark:bg-[#1e2532] p-4 shadow-[0_4px_20px_-2px_rgba(45,74,62,0.08)] border-l-[6px] border-[#c16a4d] flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-[#c16a4d]/10 text-[#c16a4d] shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
                     </div>
-                    <span className="text-xs font-medium text-slate-400">
-                      ≈ {convertToUSD(shopping.spent)}
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[#2d4a3e] dark:text-white text-sm">Compras</span>
+                      </div>
+                      <span className="text-xs font-medium text-slate-400">
+                        ≈ {convertToUSD(shopping.spent)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="font-bold text-[#2d4a3e] dark:text-white text-base">
+                      {formatCurrency(shopping.spent, shopping.currency)}
                     </span>
+                    <span className="text-xs font-medium text-slate-400">{shoppingPercent}%</span>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-0.5">
-                  <span className="font-bold text-[#2d4a3e] dark:text-white text-base">
-                    {formatCurrency(shopping.spent, shopping.currency)}
-                  </span>
-                  <span className="text-xs font-medium text-slate-400">{shoppingPercent}%</span>
+                <div className="h-1.5 w-full rounded-full bg-[#c16a4d]/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#c16a4d] transition-all duration-500"
+                    style={{ width: `${Math.min(shoppingPercent, 100)}%` }}
+                  />
                 </div>
               </div>
 
@@ -776,27 +784,35 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
                     const pct =
                       trip.spent > 0 ? Math.round((cat.spent / trip.spent) * 100) : 0
                     return (
-                      <div key={cat.category_id} className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex size-10 items-center justify-center rounded-full bg-[#2d4a3e]/5 text-[#2d4a3e] dark:text-emerald-400 shrink-0 overflow-hidden">
-                            <span className="material-symbols-outlined text-[20px]">
-                              {getCategoryMaterialIcon(cat.category_id)}
-                            </span>
+                      <div key={cat.category_id} className="p-4 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-[#2d4a3e]/5 text-[#2d4a3e] dark:text-emerald-400 shrink-0 overflow-hidden">
+                              <span className="material-symbols-outlined text-[20px]">
+                                {getCategoryMaterialIcon(cat.category_id)}
+                              </span>
+                            </div>
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-semibold text-[#2d4a3e] dark:text-white text-sm">
+                                {cat.name}
+                              </span>
+                              <span className="text-xs font-medium text-slate-400">
+                                ≈ {convertToUSD(cat.spent)}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-semibold text-[#2d4a3e] dark:text-white text-sm">
-                              {cat.name}
+                          <div className="flex flex-col items-end gap-0.5">
+                            <span className="font-bold text-[#2d4a3e] dark:text-white">
+                              {formatCurrency(cat.spent, trip.currency)}
                             </span>
-                            <span className="text-xs font-medium text-slate-400">
-                              ≈ {convertToUSD(cat.spent)}
-                            </span>
+                            <span className="text-xs font-medium text-slate-400">{pct}%</span>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-0.5">
-                          <span className="font-bold text-[#2d4a3e] dark:text-white">
-                            {formatCurrency(cat.spent, trip.currency)}
-                          </span>
-                          <span className="text-xs font-medium text-slate-400">{pct}%</span>
+                        <div className="h-1.5 w-full rounded-full bg-[#2d4a3e]/5 dark:bg-emerald-400/10 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[#2d4a3e] dark:bg-emerald-400 transition-all duration-500"
+                            style={{ width: `${Math.min(pct, 100)}%` }}
+                          />
                         </div>
                       </div>
                     )
