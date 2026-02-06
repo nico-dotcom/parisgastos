@@ -409,7 +409,9 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
   const availableToday = today?.available_today ?? 0
   const todayPercent = plannedToday > 0 ? Math.round((spentToday / plannedToday) * 100) : 0
   const tripSpentPercent = trip.total_budget > 0 ? Math.round((trip.spent / trip.total_budget) * 100) : 0
-  const shoppingPercent = trip.total_budget > 0 ? Math.round((shopping.spent / trip.total_budget) * 100) : 0
+  // Shopping % en la lista de categorías: relativo al gasto total (trip + shopping)
+  const totalSpentAll = trip.spent + shopping.spent
+  const shoppingPercent = totalSpentAll > 0 ? Math.round((shopping.spent / totalSpentAll) * 100) : 0
   // Shopping: SOLO overview.shopping (total_budget, spent, remaining); no breakdown, no sumar en front
   const shoppingBudgetPercent = shopping.total_budget > 0 ? Math.round((shopping.spent / shopping.total_budget) * 100) : 0
 
@@ -770,8 +772,9 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
                   <div className="p-4 text-center text-slate-400 text-sm">Aún no hay categorías</div>
                 ) : (
                   categories.map((cat) => {
+                    // % relativo al gasto total (trip + shopping) para que las categorías + shopping sumen ~100%
                     const pct =
-                      trip.total_budget > 0 ? Math.round((cat.spent / trip.total_budget) * 100) : 0
+                      totalSpentAll > 0 ? Math.round((cat.spent / totalSpentAll) * 100) : 0
                     return (
                       <div key={cat.category_id} className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-4">
