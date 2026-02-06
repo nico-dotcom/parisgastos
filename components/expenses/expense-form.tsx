@@ -185,7 +185,9 @@ export default function ExpenseForm({ expense, mode = 'create' }: ExpenseFormPro
     setLoading(true)
 
     try {
-      const amount = parseFloat(formData.amount)
+      // Convert comma to dot for locales that use comma as decimal separator (iOS keyboards)
+      const sanitizedAmount = formData.amount.replace(',', '.')
+      const amount = parseFloat(sanitizedAmount)
       if (isNaN(amount) || amount <= 0) {
         showValidationError('Introducí un importe válido.')
         setLoading(false)
@@ -291,11 +293,14 @@ export default function ExpenseForm({ expense, mode = 'create' }: ExpenseFormPro
                 className="bg-transparent text-5xl leading-none font-extrabold tracking-tight border-none p-0 w-full focus:ring-0 placeholder-[#2d4a3e]/10 dark:placeholder-white/10"
                 inputMode="decimal"
                 placeholder="0.00"
-                type="number"
-                step="0.01"
-                min="0"
+                type="text"
+                autoComplete="off"
                 value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                onChange={(e) => {
+                  // Allow digits, dots, and commas only
+                  const raw = e.target.value.replace(/[^0-9.,]/g, '')
+                  setFormData({ ...formData, amount: raw })
+                }}
                 required
                 disabled={loading}
               />
