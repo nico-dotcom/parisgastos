@@ -426,8 +426,9 @@ export default function ExpensesClient() {
               </div>
               <div className="flex flex-col gap-4">
                 {dayExpenses.map((expense, index) => {
-                  const categoryColor = expense.category?.color || '#3e6656'
-                  const categoryIcon = getCategoryMaterialIcon(expense.category?.id)
+                  const isShoppingExpense = expense.is_excluded || expense.category?.id === '44'
+                  const categoryColor = isShoppingExpense ? '#c16a4d' : (expense.category?.color || '#3e6656')
+                  const categoryIcon = isShoppingExpense ? 'shopping_bag' : getCategoryMaterialIcon(expense.category?.id)
                   // Use source directly from DB - NO defaults, NO inference
                   const isSplitwise = expense.source === 'splitwise'
                   const sourceLabel = expense.source === 'splitwise' ? 'Splitwise' : 'Manual'
