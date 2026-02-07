@@ -408,7 +408,9 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
   const plannedToday = today?.planned_today ?? 0
   const spentToday = today?.spent_today ?? 0
   const availableToday = today?.available_today ?? 0
-  const todayPercent = plannedToday > 0 ? Math.round((spentToday / plannedToday) * 100) : 0
+  // Budget real de hoy = lo que queda disponible + lo que ya gastaste hoy (= lo que tenias al empezar el dia, con arrastre)
+  const todayBudgetWithCarryover = availableToday + spentToday
+  const todayPercent = todayBudgetWithCarryover > 0 ? Math.round((spentToday / todayBudgetWithCarryover) * 100) : 0
   const tripSpentPercent = trip.total_budget > 0 ? Math.round((trip.spent / trip.total_budget) * 100) : 0
   // Shopping %: relativo al presupuesto de shopping
   const shoppingPercent = shopping.total_budget > 0 ? Math.round((shopping.spent / shopping.total_budget) * 100) : 0
