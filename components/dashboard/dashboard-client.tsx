@@ -87,6 +87,8 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
   const [lastSyncAt, setLastSyncAt] = useState<string | null>(null)
   const [syncFailureCount, setSyncFailureCount] = useState(0)
   const [rateLimit429, setRateLimit429] = useState(false)
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null)
+  const [, setTick] = useState(0) // force re-render for relative time
   const SYNC_COOLDOWN_MS = 3 * 60 * 1000 // 3 minutos
   const LAST_SYNC_KEY = 'splitwise_last_sync_at'
   const lastSyncAtFromDb = null; // Declare the variable here
@@ -179,6 +181,9 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
       } else if (categoriesData != null) {
         setCategories(Array.isArray(categoriesData) ? categoriesData : [categoriesData])
       }
+
+      // Marcar cuando se actualizaron los datos
+      setLastUpdatedAt(new Date())
     },
     [] // Sin dependencias - supabase es estable
   )
@@ -337,6 +342,26 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, tripId])
 
+  // Ticker: re-render cada 30s para actualizar el texto relativo
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 30_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Texto relativo: "hace X min" o "hace Xh Xmin"
+  const getRelativeTime = (date: Date | null): string | null => {
+    if (!date) return null
+    const diffMs = Date.now() - date.getTime()
+    if (diffMs < 0) return 'ahora'
+    const mins = Math.floor(diffMs / 60_000)
+    if (mins < 1) return 'ahora'
+    if (mins < 60) return `hace ${mins} min`
+    const hours = Math.floor(mins / 60)
+    const remainMins = mins % 60
+    if (remainMins === 0) return `hace ${hours}h`
+    return `hace ${hours}h ${remainMins}min`
+  }
+
   const handleLogout = async () => {
     // Limpiar todas las formas de almacenamiento de sesión
     localStorage.removeItem('app_user')
@@ -434,12 +459,16 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
               <h1 className="text-[#2d4a3e] dark:text-white text-lg font-bold tracking-tight">
                 ¡Hola {user.display_name || user.email?.split('@')[0] || 'Usuario'}!
               </h1>
-              {syncing && (
+              {syncing ? (
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
                   Actualizando...
                 </p>
-              )}
+              ) : getRelativeTime(lastUpdatedAt) ? (
+                <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                  Actualizado {getRelativeTime(lastUpdatedAt)}
+                </p>
+              ) : null}
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
@@ -612,12 +641,16 @@ export default function DashboardClient({ variant: variantFromUrl }: DashboardCl
             <h1 className="text-[#2d4a3e] dark:text-white text-lg font-bold tracking-tight">
               ¡Hola {user.display_name || user.email?.split('@')[0] || 'Usuario'}!
             </h1>
-            {syncing && (
+            {syncing ? (
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
                 Actualizando...
               </p>
-            )}
+            ) : getRelativeTime(lastUpdatedAt) ? (
+              <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                Actualizado {getRelativeTime(lastUpdatedAt)}
+              </p>
+            ) : null}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
