@@ -32,9 +32,31 @@ export async function POST(request: Request) {
       )
     }
 
+    // Get last sync timestamp to only fetch updated expenses
+    const { data: syncStatus } = await supabase
+      .from('splitwise_sync_status')
+      .select('last_successful_sync_at')
+      .eq('app_user_id', app_user_id)
+      .single()
+
+    // Build Splitwise API URL with updated_after for incremental sync
+    // and limit=0 to get ALL expenses (no pagination limit)
+    const params = new URLSearchParams({
+      group_id: String(group_id),
+      limit: '0', // 0 = no limit, returns all expenses
+    })
+
+    // If we have a previous sync, only fetch expenses updated since then
+    // Subtract 5 minutes as safety margin for clock drift
+    if (syncStatus?.last_successful_sync_at) {
+      const lastSync = new Date(syncStatus.last_successful_sync_at)
+      lastSync.setMinutes(lastSync.getMinutes() - 5)
+      params.set('updated_after', lastSync.toISOString())
+    }
+
     // Call Splitwise API
     const splitwiseResponse = await fetch(
-      `https://secure.splitwise.com/api/v3.0/get_expenses?group_id=${group_id}`,
+      `https://secure.splitwise.com/api/v3.0/get_expenses?${params.toString()}`,
       {
         method: 'GET',
         headers: {
@@ -55,10 +77,11 @@ export async function POST(request: Request) {
 
     const splitwiseData = await splitwiseResponse.json()
 
-    // Log the response structure for debugging (optional)
-    console.log('[Splitwise] Received data structure:', {
+    // Log the response structure for debugging
+    console.log('[Splitwise] Received data:', {
       hasExpenses: !!splitwiseData.expenses,
       expenseCount: splitwiseData.expenses?.length || 0,
+      updatedAfter: params.get('updated_after') || 'full sync',
     })
 
     // Pass the FULL JSON response directly to PostgreSQL function
